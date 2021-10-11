@@ -2,14 +2,14 @@
     <div class="songdetail">
       <div class="closeDetail" @click="isOpenSongDetail({isOpen: false,detail:{}})"></div>
       <div class="allSongDetail">
-        <div class="songInform" v-if="!songDetail.album">
+        <div class="songInform" v-if="!objIsNull(songDetail.album)">
           <div class="img"><img v-lazy="songDetail.al.picUrl" alt=""></div>
           <div class="songName">
             <p class="p1"><span class="sp1">歌曲：{{songDetail.name}}</span></p>
             <p class="p2">{{songDetail.ar[0].name}}</p>
           </div>
         </div>
-        <div class="songInform" v-if="songDetail.album">
+        <div class="songInform" v-if="objIsNull(songDetail.album)">
           <div class="img"><img v-lazy="songDetail.artists[0].img1v1Url" alt=""></div>
           <div class="songName">
             <p class="p1"><span class="sp1">歌曲：{{songDetail.name}}</span></p>
@@ -24,8 +24,8 @@
             <li><i class="iconfont icon-xiazai"></i><span>下载</span></li>
             <li><i class="iconfont icon-pinglun2"></i><span>评论</span></li>
             <li><i class="iconfont icon-fenxiang"></i><span>分享</span></li>
-            <li v-if="!songDetail.album"><i class="iconfont icon-gerenzhongxin"></i><span>歌手：{{songDetail.ar[0].name}}</span></li>
-            <li v-if="songDetail.album"><i class="iconfont icon-gerenzhongxin"></i><span>歌手：{{songDetail.artists[0].name}}</span></li>
+            <li v-if="!objIsNull(songDetail.album)"><i class="iconfont icon-gerenzhongxin"></i><span>歌手：{{songDetail.ar[0].name}}</span></li>
+            <li v-if="objIsNull(songDetail.album)"><i class="iconfont icon-gerenzhongxin"></i><span>歌手：{{songDetail.artists[0].name}}</span></li>
             <li><i class="iconfont icon-zhuanji"></i><span>专辑</span></li>
             <li><i class="iconfont icon-V"></i><span>云贝推歌</span></li>
             <li><i class="iconfont icon-shipin"></i><span>相关视频</span></li>
@@ -55,7 +55,25 @@
           playIndex:'playIndex',
           playList:'playList',
           isPlayList:'isPlayList'
-        })
+        }),
+        objIsNull(){ // 判断数据对象或数组是否为空
+          return (obj)=>{
+            if(obj instanceof Array){
+              if(obj.length === 0){
+                return false;
+              }else{
+                return true;
+              }
+            }else{
+              for(let k in obj){
+                if(obj.hasOwnProperty(k)){
+                  return true;
+                }
+              }
+              return false;
+            }
+          }
+        },
       },
       methods:{
         ...mapMutations({
@@ -68,15 +86,29 @@
         }),
         nextSong(){
             let count = 0;
-            let songs = {
-              duration:this.songDetail.dt,
-              imageUrl:this.songDetail.al.picUrl,
-              arName:this.songDetail.ar,
-              songName:this.songDetail.name,
-              songMinName:this.songDetail.al.name,
-              resourceId:this.songDetail.id,
-              fee:this.songDetail.fee,
-              mv: this.songDetail.mv,};
+            let songs = {};
+            if(!this.objIsNull(this.songDetail.album)){
+              songs = {
+                duration:this.songDetail.dt,
+                imageUrl:this.songDetail.al.picUrl,
+                arName:this.songDetail.ar,
+                songName:this.songDetail.name,
+                songMinName:this.songDetail.al.name,
+                resourceId:this.songDetail.id,
+                fee:this.songDetail.fee,
+                mv: this.songDetail.mv,};
+            }
+            if(this.objIsNull(this.songDetail.album)){
+              songs = {
+                duration: this.songDetail.duration,
+                imageUrl: this.songDetail.artists[0].img1v1Url,
+                arName: this.songDetail.artists,
+                songName:this.songDetail.name,
+                songMinName: this.songDetail.album.name,
+                resourceId:this.songDetail.id,
+                fee:this.songDetail.fee,
+                mv:  this.songDetail.mvid,};
+            }
             try{
                 if(this.playList.length === 0){
                   this.changeNextSong({index: 0,song: songs})
@@ -131,12 +163,12 @@
           this.detailBs = null;
           if(!this.detailBs){
             this.detailBs = new BScroll('.detailSwiper',{scrollY:true,click:true})
-            console.log(this.detailBs)
+//            console.log(this.detailBs)
           }
         })
       },
       created(){
-          console.log(this.songDetail)
+//          console.log(this.songDetail)
       },
     }
 </script>
