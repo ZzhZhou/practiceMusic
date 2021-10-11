@@ -1,5 +1,5 @@
 <template>
-    <div></div>
+    <div>this is pc page!</div>
 </template>
 <script>
     export default {}

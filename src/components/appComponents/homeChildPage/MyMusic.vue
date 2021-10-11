@@ -1,5 +1,9 @@
 <template>
-    <div></div>
+    <div class="mymusic">
+      <div class="funbtn">
+
+      </div>
+    </div>
 </template>
 <script>
     export default {}
