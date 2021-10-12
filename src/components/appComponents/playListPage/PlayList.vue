@@ -61,7 +61,7 @@
             <div class="playfn">
               <div class="otherfn">
                 <p class="like"><i class="iconfont icon-xihuan"></i></p>
-                <p class="install"><i class="iconfont icon-xiazai"></i></p>
+                <p class="install" @click="downloadFile(playList[playIndex].resourceId,playList[playIndex].songName)"><i class="iconfont icon-xiazai"></i></p>
                 <p class="ling"><i class="iconfont icon-icon--"></i></p>
                 <p class="comment"><i class="iconfont icon-pinglun2"></i></p>
                 <p class="songmenu"><i class="iconfont icon-yuandiancaidan"></i></p>
@@ -162,7 +162,7 @@
           songId:'songId',
           isOpenSheet: 'isOpenSheet',
           isMenu:'isMenu',
-          isSongDetail:'isSongDetail'
+          isSongDetail:'isSongDetail',
         }),
         barDuration(){
           let second = Math.floor(this.duration)%60;
@@ -434,10 +434,43 @@
               }
             });
           },
+          downloadFile(mid,name) {//下载文件
+            let url = `/music/song/media/outer/url?id=${mid}.mp3 `;
+            axios({
+              method: 'get',
+              responseType: 'blob',
+              url:url,
+            }).then(res=>{
+              if(!res){
+                this.$message({
+                  message: '歌曲下载失败',
+                  type: 'error',
+                  offset: 0,
+                });
+                return
+              }
+              let blobUrl = window.URL.createObjectURL(res.data);
+              let a = document.createElement("a");
+              document.body.appendChild(a);
+              a.style.display = 'none';
+              a.href = blobUrl;
+              // 设置a标签的下载属性，设置文件名及格式，后缀名最好让后端在数据格式中返回
+              a.download = `${name}.mp3`;
+              // 自触发click事件
+              a.click()
+              document.body.removeChild(a)
+              window.URL.revokeObjectURL(blobUrl);
+              this.$message({
+                message: '歌曲正在下载',
+                type: 'success',
+                offset: 0,
+              });
+            })
+          },
         },
       watch:{
         songId(news,old){
-            console.log(news)
+//            console.log(news)
           if(news!==old){
               if(!this.timer){
                 this.oncePlay(this.playIndex)

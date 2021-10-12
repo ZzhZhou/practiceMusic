@@ -21,7 +21,7 @@
           <ul>
             <li @click="nextSong"><i class="iconfont icon-bofang4"></i><span>下一首播放</span></li>
             <li><i class="iconfont icon-tianjiashoucang"></i><span>收藏到歌单</span></li>
-            <li><i class="iconfont icon-xiazai"></i><span>下载</span></li>
+            <li @click="downloadMusic"><i class="iconfont icon-xiazai"></i><span>下载</span></li>
             <li><i class="iconfont icon-pinglun2"></i><span>评论</span></li>
             <li><i class="iconfont icon-fenxiang"></i><span>分享</span></li>
             <li v-if="!objIsNull(songDetail.album)"><i class="iconfont icon-gerenzhongxin"></i><span>歌手：{{songDetail.ar[0].name}}</span></li>
@@ -83,6 +83,8 @@
           changePlayList:'changePlayList',
           changeIndex:'changeIndex',
           openCloseList:'openCloseList'
+        }),
+        ...mapActions({
         }),
         nextSong(){
             let count = 0;
@@ -155,7 +157,44 @@
               }
             }
             this.isOpenSongDetail(false);
-        }
+        },
+        downloadFile(mid,name) {//下载文件
+          let url = `/music/song/media/outer/url?id=${mid}.mp3 `;
+          axios({
+            method: 'get',
+            responseType: 'blob',
+            url:url,
+          }).then(res=>{
+            if(!res){
+              this.$message({
+                message: '歌曲下载失败',
+                type: 'error',
+                offset: 0,
+              });
+              return
+            }
+            let blobUrl = window.URL.createObjectURL(res.data);
+            let a = document.createElement("a");
+            document.body.appendChild(a);
+            a.style.display = 'none';
+            a.href = blobUrl;
+            // 设置a标签的下载属性，设置文件名及格式，后缀名最好让后端在数据格式中返回
+            a.download = `${name}.mp3`;
+            // 自触发click事件
+            a.click()
+            document.body.removeChild(a)
+            window.URL.revokeObjectURL(blobUrl);
+            this.$message({
+              message: '歌曲正在下载',
+              type: 'success',
+              offset: 0,
+            });
+          })
+        },
+        downloadMusic(){
+          this.downloadFile(this.songDetail.id,this.songDetail.name)
+          this.isOpenSongDetail(false);
+        },
       },
       updated(){},
       mounted(){
